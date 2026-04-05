@@ -2,6 +2,7 @@ import numpy as np
 from config import *
 
 
+
 def magnetic_force(q, v, b):
     force = q * (np.cross(v, b))
     return force # returns as a 3d vector
