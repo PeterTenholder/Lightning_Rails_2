@@ -29,8 +29,8 @@ In `config.py` every parameter is tunable. The most common things to change are:
 
 | File                      | What it shows                                          |
 |---------------------------|--------------------------------------------------------|
-| `B_profile.png`           | CSV B values + cubic spline. Sanity-check the fit.     |
-| `d_profile.png`           | Outer + inner spacing + spline. Sanity-check the fit.  |
+| `B_profile.png`           | Field values across the railgun                        |
+| `d_profile.png`           | Spacing of railgun                                     |
 | `railgun_simulation.png`  | 3x3 trace dashboard from the run.                      |
 
 The terminal also prints exit velocity, exit time, KE at exit, cumulative
