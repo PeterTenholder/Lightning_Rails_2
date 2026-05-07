@@ -1,35 +1,33 @@
+import os
 import numpy as np
 
-TIME =10
-STEP = 0.05
+TIME = 1.0   #  max seconds to run but loop quits early when it leaves the rails
+STEP = 1e-6  
 
-FRICTION_COEFFICIENT = 0.3  # steel on steel, NEEDS TO BE CHANGED MAYBE
+# False = launch +x  loaded at beginning
+# True  = launch -x loaded at far side
+RAIL_POLARITY_REVERSED = False
 
+RAIL_TOTAL_LENGTH = 0.305 # m
+RAIL_DIAMETER_M = 0.003# m
+LOAD_DISTANCE_FROM_END_M = 0.08 # m where ball starts
 
-#ALL measurements in meters
-INITIAL_POSITION = 0.01
-CURRENT_POSITION = 0.01
+PROJECTILE_MASS = 0.00005 #kg
+ARMATURE_CONTACT_LENGTH_M = 0.005   
 
-RAIL_TOTAL_LENGTH = 0.20
-RAIL_WIDTH = 0.005
-RAIL_HEIGTH = 0.005
+SUPPLY_CURRENT_A = 4.7  # constant DC curcuit amps 
 
-RAIL_RESISTIVITY = 2.65e-8 # need to measure
+FRICTION_COEFFICIENT = 0.05  
+CONTACT_RESISTANCE = 0.005   # ohms used for I^2R reporting
 
-DISTANCE_BETWEEN_RAILS = 0.015
-
-INTERNAL_RESISTANCE = 0.05 # resistor added to thing, can change
-
-PROJECTILE_VELOCITY = [0, 0, 0]
-PROJECTILE_MAGNETIC_FORCE = [0, 0, 0]
-PROJECTILE_MASS = 0.002 #kg
-
-CURRENT_RESISTIVITY = 0
-
-VOLTAGE = 9
+# materials, values found online
+RAIL_RESISTIVITY = 1.68e-8
 MAGNETIC_PERMEABILITY = 4e-7 * np.pi
 
-RESISTENCES = []
-CURRENTS = []
-VELOCITIES = []
+# rail_spacing.csv : position_m, spacing_m   
+# bfield.csv       : position_m, B_tesla     just maget measurements
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+RAIL_SPACING_CSV = os.path.join(_THIS_DIR, "rail_spacing.csv")
+BFIELD_CSV = os.path.join(_THIS_DIR, "bfield.csv")
+SPACING_IS_OUTER_TO_OUTER = True  # set False if csv already stores inner gap, just helpful depending on which measurements you do or watt it to do
 
