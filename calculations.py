@@ -50,7 +50,8 @@ def load_field_and_spacing_profiles():
     if np.any(inner_gap <= 0):
         raise ValueError("inner gap went negative -- check RAIL_DIAMETER_M vs spacing csv")
 
-    # smooth curves through the csv points -- call b_at(x) / gap_at(x) for any x
+    # smooth curves through the csv points through call b_at(x) / gap_at(x) for any x
+    #allows finding the field and distance at any point between measured ones very very helpful
     b_at = interp1d(bx, b_vals, kind="cubic", bounds_error=False,
                     fill_value=(b_vals[0], b_vals[-1]))
     gap_at = interp1d(sx, inner_gap, kind="cubic", bounds_error=False,
