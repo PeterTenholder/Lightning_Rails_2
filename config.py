@@ -8,7 +8,7 @@ STEP = 1e-6
 # True  = launch -x loaded at far side
 RAIL_POLARITY_REVERSED = False
 
-RAIL_TOTAL_LENGTH = 0.305 # m
+RAIL_TOTAL_LENGTH = 0.22 # m
 RAIL_DIAMETER_M = 0.003# m
 LOAD_DISTANCE_FROM_END_M = 0.08 # m where ball starts
 
@@ -28,6 +28,6 @@ MAGNETIC_PERMEABILITY = 4e-7 * np.pi
 # bfield.csv       : position_m, B_tesla     just maget measurements
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 RAIL_SPACING_CSV = os.path.join(_THIS_DIR, "rail_spacing.csv")
-BFIELD_CSV = os.path.join(_THIS_DIR, "bfield.csv")
+BFIELD_CSV = os.path.join(_THIS_DIR, "Magnetic Field Raingun Data.csv")
 SPACING_IS_OUTER_TO_OUTER = True  # set False if csv already stores inner gap, just helpful depending on which measurements you do or watt it to do
 
