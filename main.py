@@ -10,7 +10,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from config import (
     ARMATURE_CONTACT_LENGTH_M,
-    CONTACT_EFFICIENCY,
     CONTACT_RESISTANCE,
     DRAG_COEFFICIENT,
     FRICTION_COEFFICIENT,
@@ -50,7 +49,7 @@ def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
     pos, launch_sign = initial_conditions()
     velocity = 0.0
     if current is None:
-        current = SUPPLY_CURRENT_A * CONTACT_EFFICIENCY
+        current = SUPPLY_CURRENT_A
     if mu is None:
         mu = FRICTION_COEFFICIENT
     if drag_b is None:

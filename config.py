@@ -17,13 +17,10 @@ ARMATURE_CONTACT_LENGTH_M = 0.005
 
 SUPPLY_CURRENT_A = 4.61  # constant amps measured when ball not rolling but connected
 
-#Efficiency of supply current that actually ball has when rolling since the current drops during rolling
-CONTACT_EFFICIENCY = 0.35
-
 FRICTION_COEFFICIENT = 0.02
 
-# Linear drag rolling it cant continue to keep going faster due to wrinkles and rail bends, sets terminal velocity
-DRAG_COEFFICIENT = 0.002
+# Drag from rail bumps and contact losses, caps the top speed. Found from exit velocity
+DRAG_COEFFICIENT = 0.006
 
 
 # when it touches at a tiny spot and the spot acts like resistor
