@@ -1,11 +1,8 @@
-# physics + csv loader. tune values via config.py
-
 import csv
 import numpy as np
 from scipy.interpolate import interp1d
 
 from config import (
-    ARMATURE_CONTACT_LENGTH_M,
     BFIELD_CSV,
     FRICTION_COEFFICIENT,
     MAGNETIC_PERMEABILITY,
@@ -52,8 +49,9 @@ def load_field_and_spacing_profiles():
 
     # smooth curves through the csv points through call b_at(x) / gap_at(x) for any x
     #allows finding the field and distance at any point between measured ones very very helpful
-    b_at = interp1d(bx, b_vals, kind="cubic", bounds_error=False,
-                    fill_value=(b_vals[0], b_vals[-1]))
+    b_abs = np.abs(b_vals)
+    b_at = interp1d(bx, b_abs, kind="cubic", bounds_error=False,
+                    fill_value=(b_abs[0], b_abs[-1]))
     gap_at = interp1d(sx, inner_gap, kind="cubic", bounds_error=False,
                       fill_value=(inner_gap[0], inner_gap[-1]))
     raw = {
@@ -76,10 +74,6 @@ def calculate_lorentz_force(current, b_total, inner_gap):
     return current * b_total * inner_gap
 
 
-def calculate_magnetic_pressure_normal_force(b_total):
-    pressure = (b_total ** 2) / (2.0 * MAGNETIC_PERMEABILITY)
-    return pressure * RAIL_DIAMETER_M * ARMATURE_CONTACT_LENGTH_M
-
-
-def calculate_friction_force_max(b_total, mass=PROJECTILE_MASS, mu=FRICTION_COEFFICIENT):
-    return mu * (mass * 9.81 + calculate_magnetic_pressure_normal_force(b_total))
+# Ball-on-rail is line contact, so magnetic squeeze barely loads it -- use gravity only for the normal force.
+def calculate_friction_force_max(mass=PROJECTILE_MASS, mu=FRICTION_COEFFICIENT):
+    return mu * mass * 9.81

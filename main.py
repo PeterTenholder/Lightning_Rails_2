@@ -10,7 +10,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from config import (
     ARMATURE_CONTACT_LENGTH_M,
+    CONTACT_EFFICIENCY,
     CONTACT_RESISTANCE,
+    DRAG_COEFFICIENT,
     FRICTION_COEFFICIENT,
     LOAD_DISTANCE_FROM_END_M,
     PROJECTILE_MASS,
@@ -42,11 +44,22 @@ def has_exited(pos, sign):
     return pos >= RAIL_TOTAL_LENGTH if sign > 0 else pos <= 0.0
 
 
-def run_simulation(b_at, gap_at, verbose=False):
+def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
+                   step=None, time_max=None, verbose=False):
+    
     pos, launch_sign = initial_conditions()
     velocity = 0.0
-    current = SUPPLY_CURRENT_A
-    total_steps = int(TIME / STEP)
+    if current is None:
+        current = SUPPLY_CURRENT_A * CONTACT_EFFICIENCY
+    if mu is None:
+        mu = FRICTION_COEFFICIENT
+    if drag_b is None:
+        drag_b = DRAG_COEFFICIENT
+    if step is None:
+        step = STEP
+    if time_max is None:
+        time_max = TIME
+    total_steps = int(time_max / step)
 
     # logs for plotting 
     times, positions, velocities = [], [], []
@@ -65,34 +78,37 @@ def run_simulation(b_at, gap_at, verbose=False):
         b_rail_mag = calculate_b_rail(current, gap)
         b_total = b_magnet + launch_sign * b_rail_mag
         f_lorentz_signed = launch_sign * calculate_lorentz_force(current, b_total, gap)
-        f_friction_max = calculate_friction_force_max(b_total)
+        f_friction_max = calculate_friction_force_max(mu=mu)
         if velocity == 0.0:
             if abs(f_lorentz_signed) <= f_friction_max:
                 f_net = 0.0
-                f_friction_signed = f_lorentz_signed  
+                f_friction_signed = f_lorentz_signed
+                f_drag = 0.0
             else:
                 f_friction_signed = np.sign(f_lorentz_signed) * f_friction_max
+                f_drag = 0.0
                 f_net = f_lorentz_signed - f_friction_signed
         else:
             f_friction_signed = np.sign(velocity) * f_friction_max
-            f_net = f_lorentz_signed - f_friction_signed
+            f_drag = drag_b * velocity
+            f_net = f_lorentz_signed - f_friction_signed - f_drag
 
         #new velocity
-        velocity_new = velocity + (f_net / PROJECTILE_MASS) * STEP
+        velocity_new = velocity + (f_net / PROJECTILE_MASS) * step
 
         #weird velocity flip debug
         if velocity != 0.0 and np.sign(velocity_new) != np.sign(velocity):
             if abs(f_lorentz_signed) <= f_friction_max:
                 velocity_new = 0.0
         #new velocity
-        pos += velocity_new * STEP
+        pos += velocity_new * step
 
         # rail resistance grows w length
         rail_R = calculate_rail_resistance(abs(pos))
-        cumulative_i2r += (current ** 2) * (rail_R + CONTACT_RESISTANCE) * STEP
+        cumulative_i2r += (current ** 2) * (rail_R + CONTACT_RESISTANCE) * step
 
-        
-        times.append(step_idx * STEP)
+
+        times.append(step_idx * step)
         positions.append(pos)
         velocities.append(velocity_new)
         b_magnet_log.append(b_magnet)
