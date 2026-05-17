@@ -6,20 +6,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import (
-    DRAG_COEFFICIENT,
-    FRICTION_COEFFICIENT,
-    PROJECTILE_MASS,
-    STEP,
-    SUPPLY_CURRENT_A,
-    TIME,
-)
-from calculations import (
-    calculate_b_rail,
-    calculate_friction_force_max,
-    calculate_lorentz_force,
-    load_field_and_spacing_profiles,
-)
+from config import *
+from calculations import *
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 TRIAL_CSV = os.path.join(_THIS_DIR, "AP Physics C Final Project Data Analysis.csv")
@@ -54,6 +42,9 @@ def load_trials():
             elif "opposite direction" in note:
                 group = "A"
 
+
+
+
             dist_cm = _maybe_float(row[COL_DIST])
             time_s = _maybe_float(row[COL_TIME])
             start_cm = _maybe_float(row[COL_START])
@@ -73,10 +64,13 @@ def load_trials():
     return trials
 
 
+
+
+
 def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
                                current=None, mu=None, drag_b=None,
                                step=None, time_max=None):
-    
+    #good 
     if current is None:
         current = SUPPLY_CURRENT_A
     if mu is None:
@@ -84,9 +78,12 @@ def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
     if drag_b is None:
         drag_b = DRAG_COEFFICIENT
     if step is None:
+
         step = STEP
     if time_max is None:
         time_max = TIME
+
+
 
     pos = start_m
     # Launch direction comes from the real start->end ordering, not config.
@@ -112,12 +109,13 @@ def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
         if group == "B":
             b_total = -b_magnet + launch_sign * b_rail_mag
         else:
-            b_total = b_magnet + launch_sign * b_rail_mag
+            b_total = b_magnet - launch_sign * b_rail_mag
 
         f_lorentz_signed = launch_sign * calculate_lorentz_force(current, b_total, gap)
         f_friction_max = calculate_friction_force_max(mu=mu)
 
         if velocity == 0.0:
+            # friction checker so dont go over
             if abs(f_lorentz_signed) <= f_friction_max:
                 f_net = 0.0
             else:
@@ -130,7 +128,6 @@ def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
 
         velocity_new = velocity + (f_net / PROJECTILE_MASS) * step
 
-        # static-friction stall guard (same as main.py)
         if velocity != 0.0 and np.sign(velocity_new) != np.sign(velocity):
             if abs(f_lorentz_signed) <= f_friction_max:
                 velocity_new = 0.0
@@ -141,7 +138,7 @@ def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
 
     reached = reached_end(pos)
 
-    # Average velocity over the simulated run
+    # average velocity 
     elapsed_time = step_count * step
     travel_dist = abs(pos - start_m)
     v_avg_theo = travel_dist / elapsed_time if elapsed_time > 0 else 0.0
@@ -154,32 +151,13 @@ def estimate_endpoint_velocity(b_at, gap_at, start_m, end_m, group,
     }
 
 
-def print_header():
-    print("=" * 72)
-    print("Shared constants used by the model (from config.py):")
-    print(f"  Supply current   I       : {SUPPLY_CURRENT_A:.4f} A")
-    print(f"  Static friction  mu_s    : {FRICTION_COEFFICIENT:.4f}  ")
-    print(f"  Kinetic friction mu_k    : {FRICTION_COEFFICIENT:.4f}")
-    print(f"  Drag coefficient drag_b  : {DRAG_COEFFICIENT:.4f}  N/(m/s)")
-    print(f"  Projectile mass  m       : {PROJECTILE_MASS*1000:.4f} g")
-    print(f"  Integrator step  STEP    : {STEP:.1e} s")
-    print()
-    print("Group A = permanent magnets OPPOSING the induced rail field "
-          "(model like  main.py)")
-    print("Group B = permanent magnets ALIGNED with the induced rail field ")
-    print("v_avg_measured (m/s) is column 11 of the sheet: distance / time, "
-          "an average over the run.")
-    print("v_theo_avg (m/s) is the model's matching run average: travelled "
-          "distance / elapsed sim time.")
-    print("=" * 72)
-    print()
+
 
 
 def main():
     b_at, gap_at, _ = load_field_and_spacing_profiles()
     trials = load_trials()
 
-    print_header()
 
     header = (f"{'#':>3}  {'Grp':>3}  {'start(cm)':>9}  {'end(cm)':>8}  "
               f"{'sign':>4}  {'v_theo_avg(m/s)':>15}  "
@@ -202,10 +180,7 @@ def main():
               f"{t['end_cm']:>8.2f}  {res['launch_sign']:>4d}  "
               f"{v_theo:>15.4f}  {v_meas:>15.4f}{flag}")
 
-    print("-" * len(header))
-    print(f"Total trials: {len(trials)}  "
-          f"(Group A: {sum(1 for t in trials if t['group'] == 'A')}, "
-          f"Group B: {sum(1 for t in trials if t['group'] == 'B')})")
+    
 
 
 if __name__ == "__main__":

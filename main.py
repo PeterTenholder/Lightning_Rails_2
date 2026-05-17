@@ -8,27 +8,11 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from config import (
-    ARMATURE_CONTACT_LENGTH_M,
-    CONTACT_RESISTANCE,
-    DRAG_COEFFICIENT,
-    FRICTION_COEFFICIENT,
-    LOAD_DISTANCE_FROM_END_M,
-    PROJECTILE_MASS,
-    RAIL_DIAMETER_M,
-    RAIL_POLARITY_REVERSED,
-    RAIL_TOTAL_LENGTH,
-    STEP,
-    SUPPLY_CURRENT_A,
-    TIME,
-)
-from calculations import (
-    calculate_b_rail,
-    calculate_friction_force_max,
-    calculate_lorentz_force,
-    calculate_rail_resistance,
-    load_field_and_spacing_profiles,
-)
+from config import *
+from calculations import *
+
+
+
 
 
 def initial_conditions():
@@ -36,6 +20,8 @@ def initial_conditions():
     if RAIL_POLARITY_REVERSED:
         return RAIL_TOTAL_LENGTH - LOAD_DISTANCE_FROM_END_M, -1
     return LOAD_DISTANCE_FROM_END_M, +1
+
+
 
 
 def has_exited(pos, sign):
@@ -46,6 +32,7 @@ def has_exited(pos, sign):
 def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
                    step=None, time_max=None, verbose=False):
     
+
     pos, launch_sign = initial_conditions()
     velocity = 0.0
     if current is None:
@@ -60,12 +47,14 @@ def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
         time_max = TIME
     total_steps = int(time_max / step)
 
-    # logs for plotting 
+    # logs arrays for plotting 
     times, positions, velocities = [], [], []
     b_magnet_log, b_rail_log, b_total_log, gap_log = [], [], [], []
     f_lorentz_log, f_friction_log, f_net_log = [], [], []
     rail_R_log, ke_log, i2r_cum_log = [], [], []
     cumulative_i2r = 0.0
+
+
 
     for step_idx in range(total_steps):
         if has_exited(pos, launch_sign):
@@ -83,10 +72,12 @@ def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
                 f_net = 0.0
                 f_friction_signed = f_lorentz_signed
                 f_drag = 0.0
+
             else:
                 f_friction_signed = np.sign(f_lorentz_signed) * f_friction_max
                 f_drag = 0.0
                 f_net = f_lorentz_signed - f_friction_signed
+
         else:
             f_friction_signed = np.sign(velocity) * f_friction_max
             f_drag = drag_b * velocity
@@ -101,6 +92,7 @@ def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
                 velocity_new = 0.0
         #new velocity
         pos += velocity_new * step
+
 
         # rail resistance grows w length
         rail_R = calculate_rail_resistance(abs(pos))
@@ -144,6 +136,7 @@ def run_simulation(b_at, gap_at, current=None, mu=None, drag_b=None,
     }
 
 
+
 def print_design_summary(raw):
     x0, sign = initial_conditions()
     print("=" * 60)
@@ -163,6 +156,8 @@ def print_design_summary(raw):
     print(f"Friction coefficient: {FRICTION_COEFFICIENT}")
     print(f"Armature contact    : {RAIL_DIAMETER_M*1000:.2f} x {ARMATURE_CONTACT_LENGTH_M*1000:.2f} mm")
     print()
+
+
 
 
 def plot_input_profiles(raw, b_at, gap_at):
